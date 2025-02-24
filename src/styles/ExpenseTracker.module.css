@@ -14,6 +14,9 @@
 }
 
 .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 2rem;
 }
 
@@ -194,4 +197,151 @@
     display: flex;
     align-items: center;
     gap: 1rem;
+}
+
+.actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.actionButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: #f3f4f6;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    color: #4b5563;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.actionButton:hover {
+    background-color: #e5e7eb;
+}
+
+.fileInput {
+    display: none;
+}
+
+.appContainer {
+    display: flex;
+    min-height: 100vh;
+}
+
+.mainContent {
+    flex: 1;
+}
+
+.sidebar {
+    width: 300px;
+    background-color: white;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: -300px;
+    transition: left 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+.sidebar.open {
+    left: 0;
+}
+
+.sidebarHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #6b7280;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+}
+
+.closeButton:hover {
+    background-color: #f3f4f6;
+    color: #4b5563;
+}
+
+.reportsList {
+    padding: 1rem;
+}
+
+.reportItem {
+    border-bottom: 1px solid #e5e7eb;
+    padding: 1rem 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.reportInfo {
+    flex: 1;
+}
+
+.reportName {
+    font-weight: 500;
+    color: #1f2937;
+    margin-bottom: 0.25rem;
+}
+
+.reportDate {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.reportActions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.reportButton {
+    padding: 0.25rem 0.5rem;
+    background-color: #f3f4f6;
+    border: none;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    color: #4b5563;
+    cursor: pointer;
+}
+
+.reportButton:hover {
+    background-color: #e5e7eb;
+}
+
+.emptyReports {
+    padding: 2rem;
+    text-align: center;
+    color: #6b7280;
+}
+
+.titleContainer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.menuButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #6b7280;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+}
+
+.menuButton:hover {
+    background-color: #f3f4f6;
+    color: #4b5563;
 }
