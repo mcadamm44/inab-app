@@ -129,3 +129,69 @@
     color: #6b7280;
     padding: 2rem 0;
 }
+
+.categoryInput {
+    width: 140px;
+}
+
+.categoryTotals {
+    margin: 2rem 0;
+}
+
+.categoryTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1f2937;
+}
+
+.categoryGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+}
+
+.categoryCard {
+    background-color: #f3f4f6;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s;
+}
+
+.categoryCard:hover {
+    background-color: #e5e7eb;
+}
+
+.categoryName {
+    font-size: 0.875rem;
+    color: #4b5563;
+    margin-bottom: 0.5rem;
+}
+
+.categoryAmount {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.expensesTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 1rem 0;
+    color: #1f2937;
+}
+
+.expenseCategory {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-left: 1rem;
+    padding: 0.25rem 0.75rem;
+    background-color: #e5e7eb;
+    border-radius: 1rem;
+}
+
+.expenseActions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
