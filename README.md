@@ -9,7 +9,7 @@ A lightweight expense tracking application built with React and Vite that lets y
 ## Setup Instructions
 
 ### Prerequisites
-- Node.js (v14 or newer)
+- Node.js (v18 or newer)
 - npm or yarn
 
 ### Running the Application
@@ -30,22 +30,6 @@ http://localhost:5173
 - **Categorized Expenses**: Assign categories to each expense
 - **Category Totals**: View spending totals by category with color-coded cards
 - **Expense Management**: Add new expenses and delete existing ones
-
-## Project Structure
-
-```
-inab/
-├── src/
-│   ├── App.jsx              # Main application component
-│   ├── styles/
-│   │   └── ExpenseTracker.module.css  # Styles for the application
-│   ├── main.jsx             # Application entry point
-│   └── index.css            # Global styles
-├── public/                  # Static assets
-├── vite.config.js           # Vite configuration
-├── package.json             # Project dependencies and scripts
-└── index.html               # HTML template
-```
 
 ## Customization
 
