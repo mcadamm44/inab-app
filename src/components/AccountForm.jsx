@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import PropTypes from "prop-types";
+import { Plus, X, Palette } from "lucide-react";
 import styles from "../styles/ExpenseTracker.module.css";
 
 const ACCOUNT_TYPES = [
@@ -11,33 +13,50 @@ const ACCOUNT_TYPES = [
   "Other"
 ];
 
-const AccountForm = ({ onAddAccount, onCancel, editingAccount = null }) => {
+const AccountForm = ({ onAddAccount, onCancel, editingAccount }) => {
   const [formData, setFormData] = useState({
-    name: editingAccount?.name || "",
-    type: editingAccount?.type || "Checking",
-    balance: editingAccount?.balance || 0,
-    description: editingAccount?.description || "",
-    color: editingAccount?.color || generateRandomColor(),
+    name: "",
+    type: "Checking",
+    balance: "",
+    description: "",
+    color: "#3B82F6",
   });
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    if (editingAccount) {
+      setFormData({
+        name: editingAccount.name || "",
+        type: editingAccount.type || "Checking",
+        balance: editingAccount.balance?.toString() || "",
+        description: editingAccount.description || "",
+        color: editingAccount.color || "#3B82F6",
+      });
+    }
+  }, [editingAccount]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name.trim()) return;
+    if (!formData.name.trim() || !formData.balance) return;
 
-    onAddAccount({
-      ...formData,
-      balance: parseFloat(formData.balance) || 0,
-    });
+    try {
+      await onAddAccount({
+        name: formData.name.trim(),
+        type: formData.type,
+        balance: parseFloat(formData.balance) || 0,
+        description: formData.description.trim(),
+        color: formData.color,
+      });
 
-    if (!editingAccount) {
-      // Reset form only if adding new account
+      // Reset form
       setFormData({
         name: "",
         type: "Checking",
-        balance: 0,
+        balance: "",
         description: "",
-        color: generateRandomColor(),
+        color: "#3B82F6",
       });
+    } catch (error) {
+      console.error("Error adding account:", error);
     }
   };
 
@@ -50,32 +69,38 @@ const AccountForm = ({ onAddAccount, onCancel, editingAccount = null }) => {
   };
 
   return (
-    <div className={styles.formContainer}>
+    <div className={styles.formSection}>
       <h3 className={styles.formTitle}>
         {editingAccount ? "Edit Account" : "Add New Account"}
       </h3>
-      
-      <form onSubmit={handleSubmit} className={styles.form}>
+      <form onSubmit={handleSubmit} className={styles.formGrid}>
         <div className={styles.formGroup}>
-          <label className={styles.label}>Account Name</label>
+          <label htmlFor="account-name" className={styles.label}>
+            Account Name *
+          </label>
           <input
-            type="text"
+            id="account-name"
             name="name"
+            type="text"
             value={formData.name}
             onChange={handleChange}
             className={styles.input}
-            placeholder="e.g., Main Checking, Crypto Wallet"
+            placeholder="e.g., Main Checking, Savings Account"
             required
           />
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label}>Account Type</label>
+          <label htmlFor="account-type" className={styles.label}>
+            Account Type *
+          </label>
           <select
+            id="account-type"
             name="type"
             value={formData.type}
             onChange={handleChange}
-            className={styles.select}
+            className={styles.input}
+            required
           >
             {ACCOUNT_TYPES.map(type => (
               <option key={type} value={type}>{type}</option>
@@ -84,74 +109,83 @@ const AccountForm = ({ onAddAccount, onCancel, editingAccount = null }) => {
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label}>Current Balance</label>
+          <label htmlFor="account-balance" className={styles.label}>
+            Current Balance *
+          </label>
           <input
-            type="number"
+            id="account-balance"
             name="balance"
+            type="number"
             value={formData.balance}
             onChange={handleChange}
             className={styles.input}
             placeholder="0.00"
             step="0.01"
             min="0"
+            required
           />
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label}>Description (Optional)</label>
+          <label htmlFor="account-description" className={styles.label}>
+            Description (Optional)
+          </label>
           <textarea
+            id="account-description"
             name="description"
             value={formData.description}
             onChange={handleChange}
-            className={styles.textarea}
+            className={styles.input}
             placeholder="Brief description of this account"
-            rows="3"
+            rows="2"
           />
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label}>Account Color</label>
-          <div className={styles.colorPickerContainer}>
-            <input
-              type="color"
-              name="color"
-              value={formData.color}
-              onChange={handleChange}
-              className={styles.colorPicker}
-            />
-            <span className={styles.colorPreview} style={{ backgroundColor: formData.color }}>
-              {formData.color}
-            </span>
-          </div>
+          <label htmlFor="account-color" className={styles.label}>
+            <Palette size={16} />
+            Account Color
+          </label>
+          <input
+            id="account-color"
+            name="color"
+            type="color"
+            value={formData.color}
+            onChange={handleChange}
+            className={styles.colorInput}
+          />
         </div>
 
         <div className={styles.formActions}>
-          <button type="submit" className={styles.button}>
+          <button type="submit" className={styles.addButton}>
+            <Plus size={16} />
             {editingAccount ? "Update Account" : "Add Account"}
           </button>
-          {onCancel && (
-            <button
-              type="button"
-              onClick={onCancel}
-              className={`${styles.button} ${styles.buttonSecondary}`}
-            >
-              Cancel
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={onCancel}
+            className={styles.cancelButton}
+          >
+            <X size={16} />
+            Cancel
+          </button>
         </div>
       </form>
     </div>
   );
 };
 
-// Helper function to generate random colors
-const generateRandomColor = () => {
-  const colors = [
-    "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7",
-    "#DDA0DD", "#98D8C8", "#F7DC6F", "#BB8FCE", "#85C1E9",
-    "#F8C471", "#82E0AA", "#F1948A", "#85C1E9", "#D7BDE2"
-  ];
-  return colors[Math.floor(Math.random() * colors.length)];
+AccountForm.propTypes = {
+  onAddAccount: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
+  editingAccount: PropTypes.shape({
+    id: PropTypes.string,
+    name: PropTypes.string,
+    type: PropTypes.string,
+    balance: PropTypes.number,
+    description: PropTypes.string,
+    color: PropTypes.string,
+  }),
 };
 
 export default AccountForm; 

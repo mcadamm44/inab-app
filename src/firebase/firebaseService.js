@@ -26,7 +26,7 @@ export const addExpense = async (userId, expenseData) => {
   try {
     const expenseWithTimestamp = {
       ...expenseData,
-      date: Timestamp.fromDate(new Date(expenseData.date)),
+      date: expenseData.date ? Timestamp.fromDate(new Date(expenseData.date)) : Timestamp.now(),
       createdAt: Timestamp.now(),
       userId,
     };
@@ -34,6 +34,7 @@ export const addExpense = async (userId, expenseData) => {
     return {
       id: docRef.id,
       ...expenseData,
+      date: expenseData.date ? new Date(expenseData.date) : new Date(),
       createdAt: new Date(),
     };
   } catch (error) {

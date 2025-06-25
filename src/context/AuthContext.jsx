@@ -1,5 +1,6 @@
 // src/context/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
+import PropTypes from "prop-types";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -12,25 +13,29 @@ import { auth } from "../firebase/firebase";
 
 const AuthContext = createContext();
 
-export function useAuth() {
-  return useContext(AuthContext);
-}
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};
 
-export function AuthProvider({ children }) {
+export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  function signup(email, password) {
+  const signup = (email, password) => {
     return createUserWithEmailAndPassword(auth, email, password);
-  }
+  };
 
-  function login(email, password) {
+  const login = (email, password) => {
     return signInWithEmailAndPassword(auth, email, password);
-  }
+  };
 
-  function logout() {
+  const logout = () => {
     return signOut(auth);
-  }
+  };
 
   function resetPassword(email) {
     return sendPasswordResetEmail(auth, email);
@@ -56,24 +61,15 @@ export function AuthProvider({ children }) {
     logout,
     resetPassword,
     updateUserProfile,
-    loading,
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading ? children : (
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '100vh',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white',
-          fontSize: '1.2rem'
-        }}>
-          Loading...
-        </div>
-      )}
+      {!loading && children}
     </AuthContext.Provider>
   );
-}
+};
+
+AuthProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};

@@ -1,31 +1,58 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import PropTypes from "prop-types";
+import { Plus, X } from "lucide-react";
 import styles from "../styles/ExpenseTracker.module.css";
 
-const BudgetAllocationForm = ({ accounts, onAddAllocation, onCancel, editingAllocation = null }) => {
+const BudgetAllocationForm = ({ onAddAllocation, onCancel, editingAllocation, accounts }) => {
   const [formData, setFormData] = useState({
-    accountId: editingAllocation?.accountId || "",
-    amount: editingAllocation?.amount || "",
-    month: editingAllocation?.month || new Date().toISOString().slice(0, 7), // YYYY-MM format
-    description: editingAllocation?.description || "",
+    accountId: "",
+    amount: "",
+    month: "",
+    description: "",
   });
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    if (editingAllocation) {
+      setFormData({
+        accountId: editingAllocation.accountId || "",
+        amount: editingAllocation.amount?.toString() || "",
+        month: editingAllocation.month || "",
+        description: editingAllocation.description || "",
+      });
+    } else {
+      // Set default month to current month
+      const now = new Date();
+      const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      setFormData({
+        accountId: "",
+        amount: "",
+        month: currentMonth,
+        description: "",
+      });
+    }
+  }, [editingAllocation]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.accountId || !formData.amount) return;
+    if (!formData.accountId || !formData.amount || !formData.month) return;
 
-    onAddAllocation({
-      ...formData,
-      amount: parseFloat(formData.amount),
-    });
+    try {
+      await onAddAllocation({
+        accountId: formData.accountId,
+        amount: parseFloat(formData.amount) || 0,
+        month: formData.month,
+        description: formData.description.trim(),
+      });
 
-    if (!editingAllocation) {
-      // Reset form only if adding new allocation
+      // Reset form
       setFormData({
         accountId: "",
         amount: "",
         month: new Date().toISOString().slice(0, 7),
         description: "",
       });
+    } catch (error) {
+      console.error("Error adding budget allocation:", error);
     }
   };
 
@@ -46,35 +73,40 @@ const BudgetAllocationForm = ({ accounts, onAddAllocation, onCancel, editingAllo
   };
 
   return (
-    <div className={styles.formContainer}>
+    <div className={styles.formSection}>
       <h3 className={styles.formTitle}>
         {editingAllocation ? "Edit Budget Allocation" : "Add Budget Allocation"}
       </h3>
-      
-      <form onSubmit={handleSubmit} className={styles.form}>
+      <form onSubmit={handleSubmit} className={styles.formGrid}>
         <div className={styles.formGroup}>
-          <label className={styles.label}>Account</label>
+          <label htmlFor="allocation-account" className={styles.label}>
+            Account *
+          </label>
           <select
+            id="allocation-account"
             name="accountId"
             value={formData.accountId}
             onChange={handleChange}
-            className={styles.select}
+            className={styles.input}
             required
           >
-            <option value="">Select account</option>
-            {accounts.map(account => (
+            <option value="">Select an account</option>
+            {accounts.map((account) => (
               <option key={account.id} value={account.id}>
-                {account.name} ({account.type})
+                {account.name} (€{account.balance?.toFixed(2) || "0.00"})
               </option>
             ))}
           </select>
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label}>Amount</label>
+          <label htmlFor="allocation-amount" className={styles.label}>
+            Amount *
+          </label>
           <input
-            type="number"
+            id="allocation-amount"
             name="amount"
+            type="number"
             value={formData.amount}
             onChange={handleChange}
             className={styles.input}
@@ -86,10 +118,13 @@ const BudgetAllocationForm = ({ accounts, onAddAllocation, onCancel, editingAllo
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label}>Month</label>
+          <label htmlFor="allocation-month" className={styles.label}>
+            Month *
+          </label>
           <input
-            type="month"
+            id="allocation-month"
             name="month"
+            type="month"
             value={formData.month}
             onChange={handleChange}
             className={styles.input}
@@ -103,34 +138,56 @@ const BudgetAllocationForm = ({ accounts, onAddAllocation, onCancel, editingAllo
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label}>Description (Optional)</label>
-          <input
-            type="text"
+          <label htmlFor="allocation-description" className={styles.label}>
+            Description (Optional)
+          </label>
+          <textarea
+            id="allocation-description"
             name="description"
             value={formData.description}
             onChange={handleChange}
             className={styles.input}
-            placeholder="e.g., Monthly savings goal"
+            placeholder="e.g., Monthly savings goal, Emergency fund contribution"
+            rows="2"
           />
         </div>
 
         <div className={styles.formActions}>
-          <button type="submit" className={styles.button}>
+          <button type="submit" className={styles.addButton}>
+            <Plus size={16} />
             {editingAllocation ? "Update Allocation" : "Add Allocation"}
           </button>
-          {onCancel && (
-            <button
-              type="button"
-              onClick={onCancel}
-              className={`${styles.button} ${styles.buttonSecondary}`}
-            >
-              Cancel
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={onCancel}
+            className={styles.cancelButton}
+          >
+            <X size={16} />
+            Cancel
+          </button>
         </div>
       </form>
     </div>
   );
+};
+
+BudgetAllocationForm.propTypes = {
+  onAddAllocation: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
+  editingAllocation: PropTypes.shape({
+    id: PropTypes.string,
+    accountId: PropTypes.string,
+    amount: PropTypes.number,
+    month: PropTypes.string,
+    description: PropTypes.string,
+  }),
+  accounts: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      balance: PropTypes.number,
+    })
+  ).isRequired,
 };
 
 export default BudgetAllocationForm; 
