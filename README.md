@@ -1,41 +1,32 @@
 # INAB - Intelligent Budget Tracker
 
-A comprehensive expense tracking and budget management application inspired by YNAB (You Need A Budget), built with React, Firebase, and Tailwind CSS.
+A comprehensive expense tracking application with YNAB-like functionality, built with React, Firebase, and Tailwind CSS.
 
 ## Features
 
-### 🏦 Account Management
-- **Multiple Account Types**: Create and manage different types of accounts (Checking, Savings, Investment, Crypto, Credit Card, Cash, Other)
-- **Balance Tracking**: Monitor real-time balances across all your accounts
-- **Account Customization**: Add descriptions, custom colors, and account details
-- **Total Balance Overview**: See your net worth across all accounts
+### Core Functionality
+- **Expense Tracking**: Add, edit, and delete expenses with categories and dates
+- **Multiple Accounts**: Manage different account types (Checking, Savings, Investment, Crypto, etc.)
+- **Account Balance Tracking**: Real-time balance updates across all accounts
+- **Transfers**: Move money between accounts with detailed tracking
+- **Budget Allocations**: Set monthly budget targets for each account
+- **User Authentication**: Secure login and registration system
 
-### 💸 Expense Tracking
-- **Categorized Expenses**: Track expenses across 11 predefined categories
-- **Real-time Updates**: Instant synchronization with Firebase
-- **Visual Progress**: See spending progress with color-coded category cards
-- **Expense History**: Complete history of all transactions
+### Account Types Supported
+- Checking Accounts
+- Savings Accounts
+- Investment Accounts
+- Cryptocurrency Wallets
+- Credit Cards
+- Cash
+- Other
 
-### 🔄 Transfer Management
-- **Inter-Account Transfers**: Move money between your accounts
-- **Transfer History**: Track all transfers with dates and descriptions
-- **Balance Updates**: Automatic balance updates when transfers are made
-
-### 📊 Budget Allocations
-- **Monthly Budget Goals**: Set monthly budget targets for each account
-- **Goal Tracking**: Monitor progress towards your financial goals
-- **Historical Allocations**: View past budget allocations by month
-- **Flexible Planning**: Adjust allocations as your financial situation changes
-
-### 📈 Reports & Analytics
-- **Saved Reports**: Save and load budget reports for different time periods
-- **Export Functionality**: Export your financial data for external analysis
-- **Visual Insights**: Color-coded category breakdowns and progress bars
-
-### 🔐 User Management
-- **Secure Authentication**: Firebase Authentication with email/password
-- **User Profiles**: Individual user accounts with separate data
-- **Data Privacy**: Your financial data is private and secure
+### Advanced Features
+- Real-time data synchronization with Firebase
+- Responsive design for mobile and desktop
+- Dark/light theme support
+- Data export capabilities
+- Comprehensive reporting
 
 ## Getting Started
 
@@ -121,13 +112,7 @@ The test suite covers:
 
 2. **Deploy Workflow** (`.github/workflows/deploy.yml`)
    - Deploys to GitHub Pages on main branch pushes
-   - Includes Firebase rules deployment
    - Builds and publishes the application
-
-3. **Firebase Deploy Workflow** (`.github/workflows/firebase-deploy.yml`)
-   - Deploys Firestore security rules
-   - Runs when `firestore.rules` is modified
-   - Ensures security rules are always up to date
 
 ### Required Secrets
 Set these secrets in your GitHub repository:
@@ -138,69 +123,72 @@ Set these secrets in your GitHub repository:
 - `VITE_FIREBASE_MESSAGING_SENDER_ID`
 - `VITE_FIREBASE_APP_ID`
 - `VITE_FIREBASE_MEASUREMENT_ID`
-- `FIREBASE_TOKEN` (for Firebase CLI deployment)
-- `FIREBASE_PROJECT_ID` (for Firebase CLI deployment)
+
+## Firebase Setup
+
+### Manual Firebase Rules Deployment
+Since we've simplified the CI/CD pipeline, you'll need to deploy Firebase rules manually:
+
+1. Install Firebase CLI:
+```bash
+npm install -g firebase-tools
+```
+
+2. Login to Firebase:
+```bash
+firebase login
+```
+
+3. Initialize Firebase in your project:
+```bash
+firebase init
+```
+
+4. Deploy rules:
+```bash
+firebase deploy --only firestore:rules
+```
+
+### Firestore Security Rules
+The `firestore.rules` file contains secure rules that:
+- Allow authenticated users to access only their data
+- Prevent unauthorized access to other users' data
+- Enable CRUD operations on user's own collections
 
 ## Usage
 
-### Creating Accounts
+### Adding Accounts
 1. Navigate to the "Accounts" tab
 2. Click "Add Account"
-3. Fill in account details (name, type, initial balance, description)
-4. Choose a custom color for easy identification
-5. Save your account
+3. Fill in account details:
+   - Name (required)
+   - Type (required)
+   - Current Balance (required)
+   - Description (optional)
+   - Color (optional)
+4. Click "Add Account"
 
-### Adding Expenses
-1. Go to the "Expenses" tab
-2. Set your starting budget amount
-3. Add expenses with categories
-4. Monitor your remaining balance and category spending
-
-### Making Transfers
-1. Navigate to the "Transfers" tab
+### Managing Transfers
+1. Go to the "Transfers" tab
 2. Click "Add Transfer"
 3. Select source and destination accounts
 4. Enter amount and optional description
-5. Complete the transfer
+5. Choose transfer date
+6. Click "Transfer"
 
 ### Setting Budget Allocations
-1. Go to the "Budget Allocations" tab
+1. Navigate to "Budget Allocations"
 2. Click "Add Budget Allocation"
-3. Select account and set monthly target
-4. Add optional description
-5. Save your allocation
+3. Select account and month
+4. Set allocation amount
+5. Add optional description
+6. Click "Add Allocation"
 
-## Technology Stack
-
-- **Frontend**: React 18 with Hooks
-- **Styling**: Tailwind CSS with custom modules
-- **Backend**: Firebase (Authentication, Firestore)
-- **Build Tool**: Vite
-- **Deployment**: Vercel/Netlify ready
-
-## Project Structure
-
-```
-src/
-├── components/
-│   ├── auth/           # Authentication components
-│   ├── ui/             # Reusable UI components
-│   ├── AccountForm.jsx # Account creation/editing
-│   ├── AccountsList.jsx # Account display
-│   ├── TransferForm.jsx # Transfer creation
-│   ├── TransfersList.jsx # Transfer display
-│   ├── BudgetAllocationForm.jsx # Budget allocation form
-│   ├── BudgetAllocationsList.jsx # Budget allocations display
-│   └── ExpenseTracker.jsx # Main application component
-├── context/
-│   └── AuthContext.jsx # Authentication context
-├── firebase/
-│   ├── firebase.js     # Firebase configuration
-│   └── firebaseService.js # Firebase service functions
-├── styles/
-│   └── ExpenseTracker.module.css # Component styles
-└── App.jsx             # Root component
-```
+### Tracking Expenses
+1. Use the main "Expenses" tab
+2. Add expenses with categories and amounts
+3. View remaining balance updates
+4. Monitor spending patterns
 
 ## Contributing
 
@@ -216,12 +204,6 @@ src/
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- Inspired by YNAB (You Need A Budget)
-- Built with modern React patterns and best practices
-- Designed for optimal user experience and financial management
 
 ## Support
 

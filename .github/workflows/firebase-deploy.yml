@@ -33,25 +33,49 @@ jobs:
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
       
+      - name: Check Firebase Configuration
+        run: |
+          if [ -z "${{ secrets.VITE_FIREBASE_PROJECT_ID }}" ]; then
+            echo "❌ VITE_FIREBASE_PROJECT_ID secret is not set"
+            echo "Please add VITE_FIREBASE_PROJECT_ID to your GitHub repository secrets"
+            exit 1
+          fi
+          
+          if [ -z "${{ secrets.FIREBASE_TOKEN }}" ]; then
+            echo "❌ FIREBASE_TOKEN secret is not set"
+            echo "Please add FIREBASE_TOKEN to your GitHub repository secrets"
+            exit 1
+          fi
+          
+          echo "✅ Firebase configuration secrets are set"
+          echo "Project ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}"
+      
       - name: Initialize Firebase Project
         run: |
-          echo '{"projects":{"default":"${{ secrets.FIREBASE_PROJECT_ID }}"}}' > .firebaserc
+          echo '{"projects":{"default":"${{ secrets.VITE_FIREBASE_PROJECT_ID }}"}}' > .firebaserc
+          echo "Created .firebaserc with project: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}"
+          cat .firebaserc
         env:
-          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
       
       - name: Deploy Firestore Rules
-        run: firebase deploy --only firestore:rules --token "${{ secrets.FIREBASE_TOKEN }}" --project "${{ secrets.FIREBASE_PROJECT_ID }}"
+        run: |
+          echo "Deploying Firestore rules to project: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}"
+          firebase deploy --only firestore:rules --token "${{ secrets.FIREBASE_TOKEN }}" --project "${{ secrets.VITE_FIREBASE_PROJECT_ID }}"
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
       
       - name: Deploy Firestore Indexes
-        run: firebase deploy --only firestore:indexes --token "${{ secrets.FIREBASE_TOKEN }}" --project "${{ secrets.FIREBASE_PROJECT_ID }}"
+        run: |
+          echo "Deploying Firestore indexes to project: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}"
+          firebase deploy --only firestore:indexes --token "${{ secrets.FIREBASE_TOKEN }}" --project "${{ secrets.VITE_FIREBASE_PROJECT_ID }}"
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
       
       - name: Verify Rules Deployment
         run: |
           echo "✅ Firestore rules and indexes deployed successfully!"
-          echo "Project: ${{ secrets.FIREBASE_PROJECT_ID }}" 
+          echo "Project: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}"
+          echo "Deployment completed at: $(date)" 
