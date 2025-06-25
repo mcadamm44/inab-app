@@ -40,15 +40,15 @@ A comprehensive expense tracking and budget management application inspired by Y
 ## Getting Started
 
 ### Prerequisites
-- Node.js (v14 or higher)
+- Node.js (v18 or higher)
 - npm or yarn
-- Firebase project setup
+- Firebase project
 
 ### Installation
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/yourusername/inab-app.git
 cd inab-app
 ```
 
@@ -58,17 +58,88 @@ npm install
 ```
 
 3. Set up Firebase:
-   - Create a Firebase project
-   - Enable Authentication (Email/Password)
-   - Enable Firestore Database
-   - Add your Firebase configuration to `src/firebase/firebase.js`
+   - Create a new Firebase project
+   - Enable Authentication and Firestore
+   - Add your Firebase configuration to environment variables
 
-4. Start the development server:
+4. Create a `.env` file in the root directory:
+```env
+VITE_FIREBASE_API_KEY=your_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
+VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
+```
+
+5. Start the development server:
 ```bash
 npm run dev
 ```
 
-5. Open your browser and navigate to `http://localhost:5173`
+## Testing
+
+### Running Tests
+```bash
+# Run all tests
+npm test
+
+# Run tests with UI
+npm run test:ui
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run tests in watch mode
+npm run test:watch
+```
+
+### Test Structure
+- **Unit Tests**: Test individual components and functions
+- **Integration Tests**: Test component interactions
+- **Service Tests**: Test Firebase service functions
+- **Mock Setup**: Comprehensive Firebase mocking for reliable tests
+
+### Test Coverage
+The test suite covers:
+- Component rendering and user interactions
+- Form validation and submission
+- Firebase service operations
+- Error handling and edge cases
+- Data transformations and calculations
+
+## CI/CD Pipeline
+
+### GitHub Actions Workflows
+
+1. **Test Workflow** (`.github/workflows/test.yml`)
+   - Runs on push to main and pull requests
+   - Executes linting, tests, and build checks
+   - Uploads coverage reports to Codecov
+   - Ensures code quality before deployment
+
+2. **Deploy Workflow** (`.github/workflows/deploy.yml`)
+   - Deploys to GitHub Pages on main branch pushes
+   - Includes Firebase rules deployment
+   - Builds and publishes the application
+
+3. **Firebase Deploy Workflow** (`.github/workflows/firebase-deploy.yml`)
+   - Deploys Firestore security rules
+   - Runs when `firestore.rules` is modified
+   - Ensures security rules are always up to date
+
+### Required Secrets
+Set these secrets in your GitHub repository:
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_STORAGE_BUCKET`
+- `VITE_FIREBASE_MESSAGING_SENDER_ID`
+- `VITE_FIREBASE_APP_ID`
+- `VITE_FIREBASE_MEASUREMENT_ID`
+- `FIREBASE_TOKEN` (for Firebase CLI deployment)
+- `FIREBASE_PROJECT_ID` (for Firebase CLI deployment)
 
 ## Usage
 
@@ -134,10 +205,13 @@ src/
 ## Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch: `git checkout -b feature-name`
+3. Make your changes
+4. Add tests for new functionality
+5. Run the test suite: `npm test`
+6. Commit your changes: `git commit -am 'Add feature'`
+7. Push to the branch: `git push origin feature-name`
+8. Submit a pull request
 
 ## License
 
@@ -148,3 +222,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Inspired by YNAB (You Need A Budget)
 - Built with modern React patterns and best practices
 - Designed for optimal user experience and financial management
+
+## Support
+
+For support and questions, please open an issue on GitHub or contact the development team.
