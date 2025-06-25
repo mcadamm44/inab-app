@@ -6,12 +6,14 @@ on:
       - main
     paths:
       - 'firestore.rules'
+      - 'firebase.json'
       - '.github/workflows/firebase-deploy.yml'
   pull_request:
     branches:
       - main
     paths:
       - 'firestore.rules'
+      - 'firebase.json'
       - '.github/workflows/firebase-deploy.yml'
 
 jobs:
@@ -31,13 +33,25 @@ jobs:
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
       
+      - name: Initialize Firebase Project
+        run: |
+          echo '{"projects":{"default":"${{ secrets.FIREBASE_PROJECT_ID }}"}}' > .firebaserc
+        env:
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+      
       - name: Deploy Firestore Rules
         run: firebase deploy --only firestore:rules --token "${{ secrets.FIREBASE_TOKEN }}" --project "${{ secrets.FIREBASE_PROJECT_ID }}"
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
           FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
       
+      - name: Deploy Firestore Indexes
+        run: firebase deploy --only firestore:indexes --token "${{ secrets.FIREBASE_TOKEN }}" --project "${{ secrets.FIREBASE_PROJECT_ID }}"
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+      
       - name: Verify Rules Deployment
         run: |
-          echo "✅ Firestore rules deployed successfully!"
+          echo "✅ Firestore rules and indexes deployed successfully!"
           echo "Project: ${{ secrets.FIREBASE_PROJECT_ID }}" 
