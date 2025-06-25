@@ -1,8 +1,12 @@
 // src/components/CategoryGrid.jsx
+import PropTypes from "prop-types";
 import { TrendingUp, TrendingDown } from "lucide-react";
+import { useCurrency } from "../context/CurrencyContext";
 import styles from "../styles/ExpenseTracker.module.css";
 
 const CategoryGrid = ({ categories, categoryColors, getCategoryTotal, totalBudget = 0 }) => {
+  const { formatCurrency } = useCurrency();
+
   const getCategoryPercentage = (categoryTotal) => {
     if (totalBudget === 0) return 0;
     return Math.min((categoryTotal / totalBudget) * 100, 100);
@@ -33,7 +37,7 @@ const CategoryGrid = ({ categories, categoryColors, getCategoryTotal, totalBudge
               </div>
             </div>
             <div className={styles.categoryAmount}>
-              €{total.toFixed(2)}
+              {formatCurrency(total)}
             </div>
             {totalBudget > 0 && (
               <div className={styles.categoryProgress}>
@@ -54,6 +58,13 @@ const CategoryGrid = ({ categories, categoryColors, getCategoryTotal, totalBudge
       </div>
     </div>
   );
+};
+
+CategoryGrid.propTypes = {
+  categories: PropTypes.arrayOf(PropTypes.string).isRequired,
+  categoryColors: PropTypes.object.isRequired,
+  getCategoryTotal: PropTypes.func.isRequired,
+  totalBudget: PropTypes.number,
 };
 
 export default CategoryGrid;

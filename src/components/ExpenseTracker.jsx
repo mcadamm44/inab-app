@@ -1,6 +1,7 @@
 // src/components/ExpenseTracker.jsx
 import { useState, useMemo, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useCurrency } from "../context/CurrencyContext";
 import { db } from "../firebase/firebase";
 import styles from "../styles/ExpenseTracker.module.css";
 import {
@@ -54,6 +55,7 @@ const CATEGORIES = [
 
 const ExpenseTracker = () => {
   const { currentUser, logout } = useAuth();
+  const { formatCurrency } = useCurrency();
   const [total, setTotal] = useState(0);
   const [expenses, setExpenses] = useState([]);
   const [savedReports, setSavedReports] = useState([]);
@@ -551,7 +553,7 @@ const ExpenseTracker = () => {
                 <div className={styles.balanceCard}>
                   <div className={styles.balanceLabel}>Remaining Balance</div>
                   <div className={`${styles.balanceAmount} ${getRemainingBalance() < 0 ? styles.negativeBalance : ''}`}>
-                    €{getRemainingBalance().toFixed(2)}
+                    {formatCurrency(getRemainingBalance())}
                   </div>
                 </div>
 

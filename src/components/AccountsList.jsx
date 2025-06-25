@@ -1,8 +1,10 @@
 import PropTypes from "prop-types";
 import { Edit, Trash2, DollarSign } from "lucide-react";
+import { useCurrency } from "../context/CurrencyContext";
 import styles from "../styles/ExpenseTracker.module.css";
 
 const AccountsList = ({ accounts, onEditAccount, onDeleteAccount }) => {
+  const { formatCurrency } = useCurrency();
   const totalBalance = accounts.reduce((sum, account) => sum + (account.balance || 0), 0);
 
   if (accounts.length === 0) {
@@ -22,7 +24,7 @@ const AccountsList = ({ accounts, onEditAccount, onDeleteAccount }) => {
         <div className={styles.totalBalance}>
           <span>Total Balance:</span>
           <span className={styles.balanceAmount}>
-            €{totalBalance.toFixed(2)}
+            {formatCurrency(totalBalance)}
           </span>
         </div>
       </div>
@@ -40,7 +42,7 @@ const AccountsList = ({ accounts, onEditAccount, onDeleteAccount }) => {
                 <span className={styles.accountType}>{account.type}</span>
               </div>
               <div className={styles.accountBalance}>
-                €{account.balance?.toFixed(2) || "0.00"}
+                {formatCurrency(account.balance || 0)}
               </div>
             </div>
 

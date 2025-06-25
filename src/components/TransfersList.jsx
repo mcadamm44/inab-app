@@ -1,6 +1,11 @@
+import PropTypes from "prop-types";
+import { Trash2 } from "lucide-react";
+import { useCurrency } from "../context/CurrencyContext";
 import styles from "../styles/ExpenseTracker.module.css";
 
 const TransfersList = ({ transfers, accounts, onDeleteTransfer }) => {
+  const { formatCurrency } = useCurrency();
+
   const getAccountName = (accountId) => {
     const account = accounts.find(acc => acc.id === accountId);
     return account ? account.name : 'Unknown Account';
@@ -9,13 +14,6 @@ const TransfersList = ({ transfers, accounts, onDeleteTransfer }) => {
   const getAccountColor = (accountId) => {
     const account = accounts.find(acc => acc.id === accountId);
     return account ? account.color : '#ccc';
-  };
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-IE', {
-      style: 'currency',
-      currency: 'EUR'
-    }).format(amount);
   };
 
   const formatDate = (date) => {
@@ -68,7 +66,7 @@ const TransfersList = ({ transfers, accounts, onDeleteTransfer }) => {
                     className={styles.actionButton}
                     title="Delete transfer"
                   >
-                    🗑️
+                    <Trash2 size={16} />
                   </button>
                 </div>
               </div>
@@ -93,6 +91,27 @@ const TransfersList = ({ transfers, accounts, onDeleteTransfer }) => {
       )}
     </div>
   );
+};
+
+TransfersList.propTypes = {
+  transfers: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      fromAccount: PropTypes.string.isRequired,
+      toAccount: PropTypes.string.isRequired,
+      amount: PropTypes.number.isRequired,
+      date: PropTypes.oneOfType([PropTypes.string, PropTypes.object]).isRequired,
+      description: PropTypes.string,
+    })
+  ).isRequired,
+  accounts: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      color: PropTypes.string,
+    })
+  ).isRequired,
+  onDeleteTransfer: PropTypes.func.isRequired,
 };
 
 export default TransfersList; 

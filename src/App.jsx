@@ -1,4 +1,5 @@
 import { useAuth } from "./context/AuthContext";
+import { CurrencyProvider } from "./context/CurrencyContext";
 import LoginScreen from "./components/auth/LoginScreen";
 import ExpenseTracker from "./components/ExpenseTracker";
 
@@ -9,7 +10,11 @@ const App = () => {
     return <LoginScreen />;
   }
 
-  return <ExpenseTracker />;
+  return (
+    <CurrencyProvider>
+      <ExpenseTracker />
+    </CurrencyProvider>
+  );
 };
 
 export default App;

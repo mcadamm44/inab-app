@@ -1,6 +1,11 @@
+import PropTypes from "prop-types";
+import { Edit, Trash2 } from "lucide-react";
+import { useCurrency } from "../context/CurrencyContext";
 import styles from "../styles/ExpenseTracker.module.css";
 
 const BudgetAllocationsList = ({ allocations, accounts, onEditAllocation, onDeleteAllocation }) => {
+  const { formatCurrency } = useCurrency();
+
   const getAccountName = (accountId) => {
     const account = accounts.find(acc => acc.id === accountId);
     return account ? account.name : 'Unknown Account';
@@ -9,13 +14,6 @@ const BudgetAllocationsList = ({ allocations, accounts, onEditAllocation, onDele
   const getAccountColor = (accountId) => {
     const account = accounts.find(acc => acc.id === accountId);
     return account ? account.color : '#ccc';
-  };
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-IE', {
-      style: 'currency',
-      currency: 'EUR'
-    }).format(amount);
   };
 
   const formatMonth = (monthString) => {
@@ -73,14 +71,14 @@ const BudgetAllocationsList = ({ allocations, accounts, onEditAllocation, onDele
                           className={styles.actionButton}
                           title="Edit allocation"
                         >
-                          ✏️
+                          <Edit size={16} />
                         </button>
                         <button
                           onClick={() => onDeleteAllocation(allocation.id)}
                           className={styles.actionButton}
                           title="Delete allocation"
                         >
-                          🗑️
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     </div>
@@ -105,6 +103,27 @@ const BudgetAllocationsList = ({ allocations, accounts, onEditAllocation, onDele
       )}
     </div>
   );
+};
+
+BudgetAllocationsList.propTypes = {
+  allocations: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      accountId: PropTypes.string.isRequired,
+      amount: PropTypes.number.isRequired,
+      month: PropTypes.string.isRequired,
+      description: PropTypes.string,
+    })
+  ).isRequired,
+  accounts: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      color: PropTypes.string,
+    })
+  ).isRequired,
+  onEditAllocation: PropTypes.func.isRequired,
+  onDeleteAllocation: PropTypes.func.isRequired,
 };
 
 export default BudgetAllocationsList; 

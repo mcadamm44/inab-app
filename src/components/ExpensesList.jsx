@@ -1,8 +1,12 @@
 // src/components/ExpensesList.jsx
+import PropTypes from "prop-types";
 import { Trash2, Calendar, AlertCircle } from "lucide-react";
+import { useCurrency } from "../context/CurrencyContext";
 import styles from "../styles/ExpenseTracker.module.css";
 
 const ExpensesList = ({ expenses, categoryColors, onDeleteExpense }) => {
+  const { formatCurrency } = useCurrency();
+
   const formatDate = (timestamp) => {
     if (!timestamp) return "";
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -24,7 +28,7 @@ const ExpensesList = ({ expenses, categoryColors, onDeleteExpense }) => {
             {expenses.length} {expenses.length === 1 ? "expense" : "expenses"}
           </span>
           <span className={styles.expensesTotal}>
-            Total: €{totalExpenses.toFixed(2)}
+            Total: {formatCurrency(totalExpenses)}
           </span>
         </div>
       </div>
@@ -66,7 +70,7 @@ const ExpensesList = ({ expenses, categoryColors, onDeleteExpense }) => {
               </div>
               <div className={styles.expenseActions}>
                 <span className={styles.expenseAmount}>
-                  €{expense.amount.toFixed(2)}
+                  {formatCurrency(expense.amount)}
                 </span>
                 {!expense.isFromReport && (
                   <button
@@ -84,6 +88,12 @@ const ExpensesList = ({ expenses, categoryColors, onDeleteExpense }) => {
       )}
     </div>
   );
+};
+
+ExpensesList.propTypes = {
+  expenses: PropTypes.array.isRequired,
+  categoryColors: PropTypes.object.isRequired,
+  onDeleteExpense: PropTypes.func.isRequired,
 };
 
 export default ExpensesList;
