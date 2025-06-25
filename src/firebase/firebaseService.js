@@ -300,3 +300,271 @@ export const loadReport = async (userId, reportId) => {
     throw error;
   }
 };
+
+// ACCOUNTS
+
+// Get accounts collection reference
+const getAccountsRef = (userId) => {
+  return collection(db, "users", userId, "accounts");
+};
+
+// Add a new account
+export const addAccount = async (userId, accountData) => {
+  try {
+    const accountWithTimestamp = {
+      ...accountData,
+      balance: parseFloat(accountData.balance) || 0,
+      createdAt: Timestamp.now(),
+      userId,
+    };
+    const docRef = await addDoc(getAccountsRef(userId), accountWithTimestamp);
+    return {
+      id: docRef.id,
+      ...accountData,
+      balance: parseFloat(accountData.balance) || 0,
+      createdAt: new Date(),
+    };
+  } catch (error) {
+    console.error("Error adding account: ", error);
+    throw error;
+  }
+};
+
+// Update an account
+export const updateAccount = async (userId, accountId, accountData) => {
+  try {
+    const accountRef = doc(db, "users", userId, "accounts", accountId);
+    const accountWithTimestamp = {
+      ...accountData,
+      balance: parseFloat(accountData.balance) || 0,
+      updatedAt: Timestamp.now(),
+    };
+    await updateDoc(accountRef, accountWithTimestamp);
+    return {
+      id: accountId,
+      ...accountData,
+      balance: parseFloat(accountData.balance) || 0,
+      updatedAt: new Date(),
+    };
+  } catch (error) {
+    console.error("Error updating account: ", error);
+    throw error;
+  }
+};
+
+// Delete an account
+export const deleteAccount = async (userId, accountId) => {
+  try {
+    const accountRef = doc(db, "users", userId, "accounts", accountId);
+    await deleteDoc(accountRef);
+    return accountId;
+  } catch (error) {
+    console.error("Error deleting account: ", error);
+    throw error;
+  }
+};
+
+// Get all accounts for a user
+export const getAccounts = async (userId) => {
+  try {
+    const querySnapshot = await getDocs(getAccountsRef(userId));
+    const accounts = [];
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      accounts.push({
+        id: doc.id,
+        ...data,
+        balance: Number(data.balance) || 0,
+        createdAt: data.createdAt?.toDate() || new Date(),
+      });
+    });
+    return accounts;
+  } catch (error) {
+    console.error("Error getting accounts: ", error);
+    throw error;
+  }
+};
+
+// TRANSFERS
+
+// Get transfers collection reference
+const getTransfersRef = (userId) => {
+  return collection(db, "users", userId, "transfers");
+};
+
+// Add a new transfer
+export const addTransfer = async (userId, transferData) => {
+  try {
+    const transferWithTimestamp = {
+      ...transferData,
+      amount: parseFloat(transferData.amount),
+      date: Timestamp.fromDate(new Date(transferData.date)),
+      createdAt: Timestamp.now(),
+      userId,
+    };
+    const docRef = await addDoc(getTransfersRef(userId), transferWithTimestamp);
+    return {
+      id: docRef.id,
+      ...transferData,
+      amount: parseFloat(transferData.amount),
+      date: new Date(transferData.date),
+      createdAt: new Date(),
+    };
+  } catch (error) {
+    console.error("Error adding transfer: ", error);
+    throw error;
+  }
+};
+
+// Get all transfers for a user
+export const getTransfers = async (userId, filters = {}) => {
+  try {
+    const transfersRef = getTransfersRef(userId);
+    let q = transfersRef;
+
+    const constraints = [];
+    if (filters.startDate) {
+      constraints.push(
+        where("date", ">=", Timestamp.fromDate(new Date(filters.startDate)))
+      );
+    }
+    if (filters.endDate) {
+      constraints.push(
+        where("date", "<=", Timestamp.fromDate(new Date(filters.endDate)))
+      );
+    }
+    if (filters.fromAccount) {
+      constraints.push(where("fromAccount", "==", filters.fromAccount));
+    }
+    if (filters.toAccount) {
+      constraints.push(where("toAccount", "==", filters.toAccount));
+    }
+
+    constraints.push(orderBy("date", "desc"));
+
+    if (constraints.length > 0) {
+      q = query(transfersRef, ...constraints);
+    }
+
+    const querySnapshot = await getDocs(q);
+    const transfers = [];
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      transfers.push({
+        id: doc.id,
+        ...data,
+        amount: Number(data.amount),
+        date: data.date?.toDate() || new Date(),
+        createdAt: data.createdAt?.toDate() || new Date(),
+      });
+    });
+    return transfers;
+  } catch (error) {
+    console.error("Error getting transfers: ", error);
+    throw error;
+  }
+};
+
+// Delete a transfer
+export const deleteTransfer = async (userId, transferId) => {
+  try {
+    const transferRef = doc(db, "users", userId, "transfers", transferId);
+    await deleteDoc(transferRef);
+    return transferId;
+  } catch (error) {
+    console.error("Error deleting transfer: ", error);
+    throw error;
+  }
+};
+
+// BUDGET ALLOCATIONS
+
+// Get budget allocations collection reference
+const getBudgetAllocationsRef = (userId) => {
+  return collection(db, "users", userId, "budgetAllocations");
+};
+
+// Add a new budget allocation
+export const addBudgetAllocation = async (userId, allocationData) => {
+  try {
+    const allocationWithTimestamp = {
+      ...allocationData,
+      amount: parseFloat(allocationData.amount),
+      month: allocationData.month, // Format: "YYYY-MM"
+      createdAt: Timestamp.now(),
+      userId,
+    };
+    const docRef = await addDoc(getBudgetAllocationsRef(userId), allocationWithTimestamp);
+    return {
+      id: docRef.id,
+      ...allocationData,
+      amount: parseFloat(allocationData.amount),
+      createdAt: new Date(),
+    };
+  } catch (error) {
+    console.error("Error adding budget allocation: ", error);
+    throw error;
+  }
+};
+
+// Get budget allocations for a user
+export const getBudgetAllocations = async (userId, month = null) => {
+  try {
+    const allocationsRef = getBudgetAllocationsRef(userId);
+    let q = allocationsRef;
+
+    if (month) {
+      q = query(allocationsRef, where("month", "==", month));
+    }
+
+    const querySnapshot = await getDocs(q);
+    const allocations = [];
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      allocations.push({
+        id: doc.id,
+        ...data,
+        amount: Number(data.amount),
+        createdAt: data.createdAt?.toDate() || new Date(),
+      });
+    });
+    return allocations;
+  } catch (error) {
+    console.error("Error getting budget allocations: ", error);
+    throw error;
+  }
+};
+
+// Update a budget allocation
+export const updateBudgetAllocation = async (userId, allocationId, allocationData) => {
+  try {
+    const allocationRef = doc(db, "users", userId, "budgetAllocations", allocationId);
+    const allocationWithTimestamp = {
+      ...allocationData,
+      amount: parseFloat(allocationData.amount),
+      updatedAt: Timestamp.now(),
+    };
+    await updateDoc(allocationRef, allocationWithTimestamp);
+    return {
+      id: allocationId,
+      ...allocationData,
+      amount: parseFloat(allocationData.amount),
+      updatedAt: new Date(),
+    };
+  } catch (error) {
+    console.error("Error updating budget allocation: ", error);
+    throw error;
+  }
+};
+
+// Delete a budget allocation
+export const deleteBudgetAllocation = async (userId, allocationId) => {
+  try {
+    const allocationRef = doc(db, "users", userId, "budgetAllocations", allocationId);
+    await deleteDoc(allocationRef);
+    return allocationId;
+  } catch (error) {
+    console.error("Error deleting budget allocation: ", error);
+    throw error;
+  }
+};

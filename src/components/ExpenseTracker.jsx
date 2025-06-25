@@ -8,6 +8,7 @@ import {
   addDoc,
   doc,
   updateDoc,
+  setDoc,
   deleteDoc,
   Timestamp,
   onSnapshot,
@@ -19,6 +20,22 @@ import Header from "./Header";
 import ExpenseForm from "./ExpenseForm";
 import CategoryGrid from "./CategoryGrid";
 import ExpensesList from "./ExpensesList";
+import AccountForm from "./AccountForm";
+import AccountsList from "./AccountsList";
+import TransferForm from "./TransferForm";
+import TransfersList from "./TransfersList";
+import BudgetAllocationForm from "./BudgetAllocationForm";
+import BudgetAllocationsList from "./BudgetAllocationsList";
+import {
+  addAccount,
+  updateAccount,
+  deleteAccount,
+  addTransfer,
+  deleteTransfer,
+  addBudgetAllocation,
+  updateBudgetAllocation,
+  deleteBudgetAllocation,
+} from "../firebase/firebaseService";
 
 const CATEGORIES = [
   "Food",
@@ -44,6 +61,17 @@ const ExpenseTracker = () => {
   const [userProfile, setUserProfile] = useState(null);
   const [error, setError] = useState(null);
 
+  // New state for account management
+  const [accounts, setAccounts] = useState([]);
+  const [transfers, setTransfers] = useState([]);
+  const [budgetAllocations, setBudgetAllocations] = useState([]);
+  const [showAccountForm, setShowAccountForm] = useState(false);
+  const [showTransferForm, setShowTransferForm] = useState(false);
+  const [showAllocationForm, setShowAllocationForm] = useState(false);
+  const [editingAccount, setEditingAccount] = useState(null);
+  const [editingAllocation, setEditingAllocation] = useState(null);
+  const [activeTab, setActiveTab] = useState("expenses"); // expenses, accounts, transfers, allocations
+
   // Generate and memoize colors for categories
   const categoryColors = useMemo(() => {
     return CATEGORIES.reduce((acc, category) => {
@@ -52,7 +80,7 @@ const ExpenseTracker = () => {
     }, {});
   }, []);
 
-  // Load user profile, expenses, and reports from Firebase
+  // Load user profile, expenses, reports, accounts, transfers, and allocations from Firebase
   useEffect(() => {
     if (!currentUser) {
       setIsLoading(false);
@@ -73,7 +101,7 @@ const ExpenseTracker = () => {
             setTotal(doc.data().totalBudget || 0);
           } else {
             // Create a new user profile document if it doesn't exist
-            updateDoc(userProfileRef, {
+            setDoc(userProfileRef, {
               email: currentUser.email,
               totalBudget: 0,
               createdAt: Timestamp.now(),
@@ -127,11 +155,77 @@ const ExpenseTracker = () => {
             });
           });
           setSavedReports(reportsList);
-          setIsLoading(false);
         },
         (error) => {
           console.error("Error loading reports:", error);
           setError("Failed to load reports");
+        }
+      );
+
+      // Get accounts
+      const accountsRef = collection(db, "users", currentUser.uid, "accounts");
+      const accountsQuery = query(accountsRef, orderBy("createdAt", "desc"));
+      const unsubscribeAccounts = onSnapshot(
+        accountsQuery,
+        (snapshot) => {
+          const accountsList = [];
+          snapshot.forEach((doc) => {
+            accountsList.push({
+              id: doc.id,
+              ...doc.data(),
+              balance: parseFloat(doc.data().balance) || 0,
+            });
+          });
+          setAccounts(accountsList);
+        },
+        (error) => {
+          console.error("Error loading accounts:", error);
+          setError("Failed to load accounts");
+        }
+      );
+
+      // Get transfers
+      const transfersRef = collection(db, "users", currentUser.uid, "transfers");
+      const transfersQuery = query(transfersRef, orderBy("date", "desc"));
+      const unsubscribeTransfers = onSnapshot(
+        transfersQuery,
+        (snapshot) => {
+          const transfersList = [];
+          snapshot.forEach((doc) => {
+            transfersList.push({
+              id: doc.id,
+              ...doc.data(),
+              amount: parseFloat(doc.data().amount),
+            });
+          });
+          setTransfers(transfersList);
+        },
+        (error) => {
+          console.error("Error loading transfers:", error);
+          setError("Failed to load transfers");
+        }
+      );
+
+      // Get budget allocations
+      const allocationsRef = collection(db, "users", currentUser.uid, "budgetAllocations");
+      const allocationsQuery = query(allocationsRef, orderBy("createdAt", "desc"));
+      const unsubscribeAllocations = onSnapshot(
+        allocationsQuery,
+        (snapshot) => {
+          const allocationsList = [];
+          snapshot.forEach((doc) => {
+            allocationsList.push({
+              id: doc.id,
+              ...doc.data(),
+              amount: parseFloat(doc.data().amount),
+            });
+          });
+          setBudgetAllocations(allocationsList);
+          setIsLoading(false);
+        },
+        (error) => {
+          console.error("Error loading budget allocations:", error);
+          setError("Failed to load budget allocations");
           setIsLoading(false);
         }
       );
@@ -141,6 +235,9 @@ const ExpenseTracker = () => {
         unsubscribeProfile();
         unsubscribeExpenses();
         unsubscribeReports();
+        unsubscribeAccounts();
+        unsubscribeTransfers();
+        unsubscribeAllocations();
       };
     } catch (error) {
       console.error("Error setting up Firebase listeners:", error);
@@ -188,6 +285,113 @@ const ExpenseTracker = () => {
     } catch (error) {
       console.error("Error deleting expense:", error);
       setError("Failed to delete expense. Please try again.");
+    }
+  };
+
+  // Account management functions
+  const handleAddAccount = async (accountData) => {
+    if (!currentUser) return;
+
+    try {
+      setError(null);
+      if (editingAccount) {
+        await updateAccount(currentUser.uid, editingAccount.id, accountData);
+        setEditingAccount(null);
+      } else {
+        await addAccount(currentUser.uid, accountData);
+      }
+      setShowAccountForm(false);
+    } catch (error) {
+      console.error("Error managing account:", error);
+      setError("Failed to manage account. Please try again.");
+    }
+  };
+
+  const handleEditAccount = (account) => {
+    setEditingAccount(account);
+    setShowAccountForm(true);
+  };
+
+  const handleDeleteAccount = async (accountId) => {
+    if (!currentUser) return;
+
+    const confirmed = confirm("Are you sure you want to delete this account? This action cannot be undone.");
+    if (!confirmed) return;
+
+    try {
+      setError(null);
+      await deleteAccount(currentUser.uid, accountId);
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      setError("Failed to delete account. Please try again.");
+    }
+  };
+
+  // Transfer management functions
+  const handleAddTransfer = async (transferData) => {
+    if (!currentUser) return;
+
+    try {
+      setError(null);
+      await addTransfer(currentUser.uid, transferData);
+      setShowTransferForm(false);
+    } catch (error) {
+      console.error("Error adding transfer:", error);
+      setError("Failed to add transfer. Please try again.");
+    }
+  };
+
+  const handleDeleteTransfer = async (transferId) => {
+    if (!currentUser) return;
+
+    const confirmed = confirm("Are you sure you want to delete this transfer?");
+    if (!confirmed) return;
+
+    try {
+      setError(null);
+      await deleteTransfer(currentUser.uid, transferId);
+    } catch (error) {
+      console.error("Error deleting transfer:", error);
+      setError("Failed to delete transfer. Please try again.");
+    }
+  };
+
+  // Budget allocation management functions
+  const handleAddAllocation = async (allocationData) => {
+    if (!currentUser) return;
+
+    try {
+      setError(null);
+      if (editingAllocation) {
+        await updateBudgetAllocation(currentUser.uid, editingAllocation.id, allocationData);
+        setEditingAllocation(null);
+      } else {
+        await addBudgetAllocation(currentUser.uid, allocationData);
+      }
+      setShowAllocationForm(false);
+    } catch (error) {
+      console.error("Error managing budget allocation:", error);
+      setError("Failed to manage budget allocation. Please try again.");
+    }
+  };
+
+  const handleEditAllocation = (allocation) => {
+    setEditingAllocation(allocation);
+    setShowAllocationForm(true);
+  };
+
+  const handleDeleteAllocation = async (allocationId) => {
+    if (!currentUser) return;
+
+    const confirmed = confirm("Are you sure you want to delete this budget allocation?");
+    if (!confirmed) return;
+
+    try {
+      setError(null);
+      await deleteBudgetAllocation(currentUser.uid, allocationId);
+    } catch (error) {
+      console.error("Error deleting budget allocation:", error);
+      setError("Failed to delete budget allocation. Please try again.");
     }
   };
 
@@ -305,43 +509,180 @@ const ExpenseTracker = () => {
               onLogout={logout}
             />
 
-            <div className={styles.budgetSection}>
-              <label className={styles.label}>Starting Amount</label>
-              <input
-                type="number"
-                value={total}
-                onChange={(e) => setTotal(parseFloat(e.target.value) || 0)}
-                className={`${styles.input} ${styles.nameInput}`}
-                placeholder="Enter your total amount"
-                min="0"
-                step="0.01"
-              />
+            {/* Navigation Tabs */}
+            <div className={styles.tabNavigation}>
+              <button
+                className={`${styles.tabButton} ${activeTab === "expenses" ? styles.activeTab : ""}`}
+                onClick={() => setActiveTab("expenses")}
+              >
+                Expenses
+              </button>
+              <button
+                className={`${styles.tabButton} ${activeTab === "accounts" ? styles.activeTab : ""}`}
+                onClick={() => setActiveTab("accounts")}
+              >
+                Accounts
+              </button>
+              <button
+                className={`${styles.tabButton} ${activeTab === "transfers" ? styles.activeTab : ""}`}
+                onClick={() => setActiveTab("transfers")}
+              >
+                Transfers
+              </button>
+              <button
+                className={`${styles.tabButton} ${activeTab === "allocations" ? styles.activeTab : ""}`}
+                onClick={() => setActiveTab("allocations")}
+              >
+                Budget Allocations
+              </button>
             </div>
 
-            <div className={styles.balanceCard}>
-              <div className={styles.balanceLabel}>Remaining Balance</div>
-              <div className={`${styles.balanceAmount} ${getRemainingBalance() < 0 ? styles.negativeBalance : ''}`}>
-                €{getRemainingBalance().toFixed(2)}
-              </div>
-            </div>
+            {/* Expenses Tab */}
+            {activeTab === "expenses" && (
+              <>
+                <div className={styles.budgetSection}>
+                  <label className={styles.label}>Starting Amount</label>
+                  <input
+                    type="number"
+                    value={total}
+                    onChange={(e) => setTotal(parseFloat(e.target.value) || 0)}
+                    className={`${styles.input} ${styles.nameInput}`}
+                    placeholder="Enter your total amount"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
 
-            <ExpenseForm
-              onAddExpense={handleAddExpense}
-              categories={CATEGORIES}
-            />
+                <div className={styles.balanceCard}>
+                  <div className={styles.balanceLabel}>Remaining Balance</div>
+                  <div className={`${styles.balanceAmount} ${getRemainingBalance() < 0 ? styles.negativeBalance : ''}`}>
+                    €{getRemainingBalance().toFixed(2)}
+                  </div>
+                </div>
 
-            <CategoryGrid
-              categories={CATEGORIES}
-              categoryColors={categoryColors}
-              getCategoryTotal={getCategoryTotal}
-              totalBudget={total}
-            />
+                <ExpenseForm
+                  onAddExpense={handleAddExpense}
+                  categories={CATEGORIES}
+                />
 
-            <ExpensesList
-              expenses={expenses}
-              categoryColors={categoryColors}
-              onDeleteExpense={deleteExpense}
-            />
+                <CategoryGrid
+                  categories={CATEGORIES}
+                  categoryColors={categoryColors}
+                  getCategoryTotal={getCategoryTotal}
+                  totalBudget={total}
+                />
+
+                <ExpensesList
+                  expenses={expenses}
+                  categoryColors={categoryColors}
+                  onDeleteExpense={deleteExpense}
+                />
+              </>
+            )}
+
+            {/* Accounts Tab */}
+            {activeTab === "accounts" && (
+              <>
+                <div className={styles.sectionActions}>
+                  <button
+                    onClick={() => setShowAccountForm(true)}
+                    className={styles.button}
+                  >
+                    Add Account
+                  </button>
+                </div>
+
+                {showAccountForm && (
+                  <AccountForm
+                    onAddAccount={handleAddAccount}
+                    onCancel={() => {
+                      setShowAccountForm(false);
+                      setEditingAccount(null);
+                    }}
+                    editingAccount={editingAccount}
+                  />
+                )}
+
+                <AccountsList
+                  accounts={accounts}
+                  onEditAccount={handleEditAccount}
+                  onDeleteAccount={handleDeleteAccount}
+                />
+              </>
+            )}
+
+            {/* Transfers Tab */}
+            {activeTab === "transfers" && (
+              <>
+                <div className={styles.sectionActions}>
+                  <button
+                    onClick={() => setShowTransferForm(true)}
+                    className={styles.button}
+                    disabled={accounts.length < 2}
+                  >
+                    Add Transfer
+                  </button>
+                  {accounts.length < 2 && (
+                    <small className={styles.helperText}>
+                      You need at least 2 accounts to make transfers
+                    </small>
+                  )}
+                </div>
+
+                {showTransferForm && (
+                  <TransferForm
+                    accounts={accounts}
+                    onAddTransfer={handleAddTransfer}
+                    onCancel={() => setShowTransferForm(false)}
+                  />
+                )}
+
+                <TransfersList
+                  transfers={transfers}
+                  accounts={accounts}
+                  onDeleteTransfer={handleDeleteTransfer}
+                />
+              </>
+            )}
+
+            {/* Budget Allocations Tab */}
+            {activeTab === "allocations" && (
+              <>
+                <div className={styles.sectionActions}>
+                  <button
+                    onClick={() => setShowAllocationForm(true)}
+                    className={styles.button}
+                    disabled={accounts.length === 0}
+                  >
+                    Add Budget Allocation
+                  </button>
+                  {accounts.length === 0 && (
+                    <small className={styles.helperText}>
+                      You need to create accounts first
+                    </small>
+                  )}
+                </div>
+
+                {showAllocationForm && (
+                  <BudgetAllocationForm
+                    accounts={accounts}
+                    onAddAllocation={handleAddAllocation}
+                    onCancel={() => {
+                      setShowAllocationForm(false);
+                      setEditingAllocation(null);
+                    }}
+                    editingAllocation={editingAllocation}
+                  />
+                )}
+
+                <BudgetAllocationsList
+                  allocations={budgetAllocations}
+                  accounts={accounts}
+                  onEditAllocation={handleEditAllocation}
+                  onDeleteAllocation={handleDeleteAllocation}
+                />
+              </>
+            )}
           </div>
         </div>
       </div>
