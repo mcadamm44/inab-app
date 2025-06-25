@@ -16,28 +16,26 @@ jobs:
       - name: Checkout 🛎️
         uses: actions/checkout@v3
       
-      - name: Setup Node.js 🏗️
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
-          
-      - name: Clean npm cache 🧽
-        run: npm cache clean --force
+          cache: 'npm'
+      
+      - name: Cache node modules
+        uses: actions/cache@v3
+        id: cache-npm
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
       
       - name: Install Dependencies
-        run: |
-          npm install
-          npm install -g vite
-          npm install -D vite
-
-      - name: Verify installation
-        run: |
-          ls -la node_modules/.bin/
-          echo $PATH
-          which vite || echo "vite not in PATH"
-          find . -name vite -type f
+        if: steps.cache-npm.outputs.cache-hit != 'true'
+        run: npm ci
       
-      - name: Build 👷
+      - name: Build
         run: npm run build
       
       - name: Deploy 🚀
