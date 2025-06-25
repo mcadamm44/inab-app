@@ -2,45 +2,32 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Users can only access their own data
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    
-    // Expenses - users can only access their own expenses
-    match /expenses/{expenseId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
-    }
-    
-    // Accounts - users can only access their own accounts
-    match /accounts/{accountId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
-    }
-    
-    // Transfers - users can only access their own transfers
-    match /transfers/{transferId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
-    }
-    
-    // Budget Allocations - users can only access their own allocations
-    match /budgetAllocations/{allocationId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
-    }
-    
-    // Categories - users can only access their own categories
-    match /categories/{categoryId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
-    }
-    
-    // Reports - users can only access their own reports
-    match /reports/{reportId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      
+      match /expenses/{expenseId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      match /categories/{categoryId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      match /reports/{reportId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      match /accounts/{accountId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      match /transfers/{transferId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      match /budgetAllocations/{allocationId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
     }
   }
 } 

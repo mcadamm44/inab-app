@@ -35,6 +35,7 @@ import {
   addBudgetAllocation,
   updateBudgetAllocation,
   deleteBudgetAllocation,
+  addExpense,
 } from "../firebase/firebaseService";
 
 const CATEGORIES = [
@@ -262,13 +263,7 @@ const ExpenseTracker = () => {
 
     try {
       setError(null);
-      const expensesRef = collection(db, "users", currentUser.uid, "expenses");
-      await addDoc(expensesRef, {
-        name: expenseData.name,
-        amount: parseFloat(expenseData.amount),
-        category: expenseData.category,
-        createdAt: Timestamp.now(),
-      });
+      await addExpense(currentUser.uid, expenseData);
     } catch (error) {
       console.error("Error adding expense:", error);
       setError("Failed to add expense. Please try again.");
