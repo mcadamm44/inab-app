@@ -2266,3 +2266,11 @@
   z-index: 1000;
   min-width: 120px;
 }
+
+.menuItem:has(.currencySelectorWrapper) {
+  cursor: default;
+}
+
+.menuItem:has(.currencySelectorWrapper):hover {
+  background: none;
+}
