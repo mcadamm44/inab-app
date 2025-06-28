@@ -1,19 +1,30 @@
 import { useAuth } from "./context/AuthContext";
-import { CurrencyProvider } from "./context/CurrencyContext";
+import { CurrencyProvider } from "./context/CurrencyContext.jsx";
+import { ThemeProvider } from './context/ThemeContext';
+import { ThemeProvider as NextThemesProvider } from 'next-themes';
 import LoginScreen from "./components/auth/LoginScreen";
-import ExpenseTracker from "./components/ExpenseTracker";
+import AllocationTracker from "./components/AllocationTracker";
+import './App.css';
 
-const App = () => {
+const AppContent = () => {
   const { currentUser } = useAuth();
 
   if (!currentUser) {
     return <LoginScreen />;
   }
 
+  return <AllocationTracker />;
+};
+
+const App = () => {
   return (
-    <CurrencyProvider>
-      <ExpenseTracker />
-    </CurrencyProvider>
+    <NextThemesProvider attribute="class" defaultTheme="system" enableSystem>
+      <CurrencyProvider>
+        <ThemeProvider>
+          <AppContent />
+        </ThemeProvider>
+      </CurrencyProvider>
+    </NextThemesProvider>
   );
 };
 

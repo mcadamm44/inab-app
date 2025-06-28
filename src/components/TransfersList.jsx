@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { Trash2 } from "lucide-react";
-import { useCurrency } from "../context/CurrencyContext";
+import { useCurrency } from "../context/CurrencyContext.jsx";
 import styles from "../styles/ExpenseTracker.module.css";
 
 const TransfersList = ({ transfers, accounts, onDeleteTransfer }) => {

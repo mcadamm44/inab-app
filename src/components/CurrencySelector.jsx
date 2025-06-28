@@ -1,7 +1,7 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
 import { ChevronDown, Globe } from "lucide-react";
-import { useCurrency } from "../context/CurrencyContext";
+import { useCurrency } from "../context/CurrencyContext.jsx";
 import styles from "../styles/ExpenseTracker.module.css";
 
 const CurrencySelector = ({ className = "" }) => {

@@ -1,7 +1,7 @@
 // src/components/ExpensesList.jsx
 import PropTypes from "prop-types";
 import { Trash2, Calendar, AlertCircle } from "lucide-react";
-import { useCurrency } from "../context/CurrencyContext";
+import { useCurrency } from "../context/CurrencyContext.jsx";
 import styles from "../styles/ExpenseTracker.module.css";
 
 const ExpensesList = ({ expenses, categoryColors, onDeleteExpense }) => {

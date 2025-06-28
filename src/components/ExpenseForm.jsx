@@ -1,13 +1,21 @@
 // src/components/ExpenseForm.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import PropTypes from "prop-types";
 import { Plus, DollarSign, Tag, FileText } from "lucide-react";
 import styles from "../styles/ExpenseTracker.module.css";
 
-const ExpenseForm = ({ onAddExpense, categories }) => {
+const ExpenseForm = ({ onAddExpense, categories, preSelectedCategory, onPreSelectedCategoryChange }) => {
   const [expenseName, setExpenseName] = useState("");
   const [expenseAmount, setExpenseAmount] = useState("");
   const [expenseCategory, setExpenseCategory] = useState(categories[0]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Update category when preSelectedCategory changes
+  useEffect(() => {
+    if (preSelectedCategory && categories.includes(preSelectedCategory)) {
+      setExpenseCategory(preSelectedCategory);
+    }
+  }, [preSelectedCategory, categories]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,6 +34,11 @@ const ExpenseForm = ({ onAddExpense, categories }) => {
       setExpenseName("");
       setExpenseAmount("");
       setExpenseCategory(categories[0]);
+      
+      // Clear pre-selected category
+      if (onPreSelectedCategoryChange) {
+        onPreSelectedCategoryChange(null);
+      }
     } catch (error) {
       console.error("Error adding expense:", error);
     } finally {
@@ -37,7 +50,9 @@ const ExpenseForm = ({ onAddExpense, categories }) => {
 
   return (
     <div className={styles.formSection}>
-      <h3 className={styles.formTitle}>Add New Expense</h3>
+      <h3 className={styles.formTitle}>
+        {preSelectedCategory ? `Add ${preSelectedCategory} Expense` : "Add New Expense"}
+      </h3>
       <form onSubmit={handleSubmit} className={styles.formGrid}>
         <div className={styles.formGroup}>
           <label htmlFor="expense-name" className={styles.label}>
@@ -112,6 +127,13 @@ const ExpenseForm = ({ onAddExpense, categories }) => {
       </form>
     </div>
   );
+};
+
+ExpenseForm.propTypes = {
+  onAddExpense: PropTypes.func.isRequired,
+  categories: PropTypes.arrayOf(PropTypes.string).isRequired,
+  preSelectedCategory: PropTypes.string,
+  onPreSelectedCategoryChange: PropTypes.func,
 };
 
 export default ExpenseForm;

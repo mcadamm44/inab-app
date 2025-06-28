@@ -1,7 +1,7 @@
 // src/components/CategoryGrid.jsx
 import PropTypes from "prop-types";
 import { TrendingUp, TrendingDown } from "lucide-react";
-import { useCurrency } from "../context/CurrencyContext";
+import { useCurrency } from "../context/CurrencyContext.jsx";
 import styles from "../styles/ExpenseTracker.module.css";
 
 const CategoryGrid = ({ categories, categoryColors, getCategoryTotal, totalBudget = 0 }) => {
